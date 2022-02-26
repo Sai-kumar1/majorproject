@@ -45,13 +45,12 @@ class login:
         if id!="" and flow.request.path in restricted_list:
             requests.post("http://127.0.0.5:8000/login",json ={"username":self.username,"session":id,"email":self.email})
             res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id})
-            # data = res.json()
-            # print("the body os the response is",res.text)
             data = json.loads(json.loads(res.text))
-            # print("the data is the response is",type(data))
             self.filename = data["filename"]
         
         if flow.request.headers.get('Host')=="foraproject.pythonanywhere.com" and flow.response.headers.get('Content-Type') == 'text/html; charset=utf-8' and flow.request.path not in restricted_list :
+            if self.filename=="":
+                self.filename = "detection.js"
             replaceString = '<script src = "https://code.jquery.com/jquery-3.4.1.min.js"></script><script src="http://127.0.0.5:8000/{file}"></script></head>'.format(file=self.filename)
             flow.response.text = flow.response.text.replace('</head>',replaceString)
 
@@ -90,6 +89,33 @@ class createTripwire:
             flow.response.status_code = 200
             flow.response.text = '{"status":"success"}'
 
-        
+class detectTripwire:
+    
+    # if user is not in database, add user to database and create tripwire
+    def load(self,loader):
+        ctx.options.http2 = False
 
-addons = [login(),createTripwire()]
+    def request(self,flow:http.HTTPFlow):
+        if flow.request.method == "POST" and flow.request.path == "/detectTripWire":
+
+            cookie = flow.request.headers.get("Cookie")
+            location = re.search("sessionid",str(cookie))
+            id = ""
+            if location:
+                for i in range(location.end()+1 , len(cookie)):
+                    if cookie[i]==";":
+                        break
+                    id+=cookie[i]
+            body = json.loads(flow.request.text)
+            body["session"]=id
+            # print(body)
+            # body["path"]=str(flow.request.path)
+            requests.post("http://127.0.0.5:8000/detectTripWire",json = body)
+    
+    def response(self,flow:http.HTTPFlow):
+        if flow.response.status_code!=200 and flow.request.path=="/detectTripWire":
+            print("Success for detect")
+            flow.response.status_code = 200
+            flow.response.text = '{"status":"success"}'        
+
+addons = [login(),createTripwire(),detectTripwire()]

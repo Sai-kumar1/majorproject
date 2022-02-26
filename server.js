@@ -80,10 +80,11 @@ app.post("/detectTripWire", async (req, res) => {
         requestBody = JSON.parse(body);
         items=await mongoOperations.findItem({"session":requestBody.session});
         requestBody["paths"].forEach(element => {
-           if( items.tripwire[element.location].includes(element.path)){
-                count+=1
+           if( items[0].tripwire[element.location]!=undefined && items[0].tripwire[element.location].includes(element.path)){
+                count+=1;
+                
            } 
-
+           console.log(items[0].tripwire[element.location])
              //need to handle the threshold here     
         });
         console.log(count);
