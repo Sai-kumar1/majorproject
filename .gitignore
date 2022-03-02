@@ -1,0 +1,5 @@
+node_modules/
+toteam.zip
+__pycache__/
+package-lock.json
+toteam/
