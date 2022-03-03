@@ -1,8 +1,7 @@
 // const sendmail = require('sendmail')();
 const nodemailer = require("nodemailer");
-// const fs = require("fs")
+const mailTemplate = require("./mailTemplate.js");
 
-// const data = fs.readFile("./mailTemplate.txt")
 
 
 var smtpTransport = nodemailer.createTransport({
@@ -16,17 +15,9 @@ var smtpTransport = nodemailer.createTransport({
 
 
 exports.sendMail = (userInfo) => {
-  let data = `hello ${userInfo.user},
-
-  We have found that some thing wrong is going on in your account.That may be an intruder.
-
-  So we are closing your account ,please log in again.
-
-  Thankyou,
-  https://foraproject.pythonanywhere.com`
+  let data = mailTemplate.renderMailTemplate(userInfo);
 
   smtpTransport.sendMail({
-      // from: 'no-reply@foraproject.pythonanywhere.com',
       to: userInfo.email,
       subject: "Account Closed",
       text: data,
