@@ -1,4 +1,4 @@
-import email
+# import email
 import json
 import urllib
 from urllib import request
@@ -28,6 +28,21 @@ class login:
             qs_dict=urllib.parse.parse_qs(request_text)
             self.username=qs_dict["username"][0]
             self.email=qs_dict["email"][0]
+        
+        if flow.request.method == "POST" or flow.request.method == "GET":
+
+            cookie = flow.request.headers.get("Cookie")
+            location = re.search("sessionid",str(cookie))
+            id = ""
+            if location:
+                for i in range(location.end()+1 , len(cookie)):
+                    if cookie[i]==";":
+                        break
+                    id+=cookie[i]
+            
+            res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id})
+            data = json.loads(json.loads(res.text))
+            self.filename = data["filename"]
 
 
     def response(self,flow:http.HTTPFlow):
@@ -40,13 +55,11 @@ class login:
                 if cookie[i]==";":
                     break
                 id+=cookie[i]
-        print(cookie)
-        print("\n",id)
+        # print(cookie)
+        # print("\n",id)
         if id!="" and flow.request.path in restricted_list:
             requests.post("http://127.0.0.5:8000/login",json ={"username":self.username,"session":id,"email":self.email})
-            res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id})
-            data = json.loads(json.loads(res.text))
-            self.filename = data["filename"]
+            
         
         if flow.request.headers.get('Host')=="foraproject.pythonanywhere.com" and flow.response.headers.get('Content-Type') == 'text/html; charset=utf-8' and flow.request.path not in restricted_list :
             if self.filename=="":
