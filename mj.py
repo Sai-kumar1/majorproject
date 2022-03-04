@@ -123,8 +123,9 @@ class detectTripwire:
             body["session"]=id
             # print(body)
             # body["path"]=str(flow.request.path)
-            requests.post("http://127.0.0.5:8000/detectTripWire",json = body)
-    
+            res=requests.post("http://127.0.0.5:8000/detectTripWire",json = body)
+            print(res.text)
+
     def response(self,flow:http.HTTPFlow):
         if flow.response.status_code!=200 and flow.request.path=="/detectTripWire":
             print("Success for detect")

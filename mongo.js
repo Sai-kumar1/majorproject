@@ -6,7 +6,10 @@ const tripWireModel = mongoose.model('tripwires', new mongoose.Schema({
     "username": String,
     "tripwire": {},
     "session": String,
-    "email":String 
+    "email":String,
+    "tripwireCreated":String,
+    "bannedAccount":String
+
 })) ;
 
 exports.updateTripwire = async (body) => {
@@ -51,7 +54,7 @@ exports.updateSession = async (body) => {
 exports.createItem = async (body) => {
     try{
         console.log(body);
-        let data = await tripWireModel.create({"username": body.username, "tripwire": {"/":[]}, "session": body.session, "email": body.email});
+        let data = await tripWireModel.create({"username": body.username, "tripwire": {"/":[]}, "session": body.session, "email": body.email,"tripwireCreated":"False","bannedAccount":"False"});
         console.log(data);
     }
     catch(err){
@@ -64,4 +67,23 @@ exports.findItem = async(conditions)=>{
     let data = await tripWireModel.find(conditions).exec();
     console.log(data);
     return data;
+}
+
+exports.deleteItem=async(conditions)=>{
+    try{
+        let data = await tripWireModel.deleteOne(conditions);
+        console.log(data);
+    }
+    catch(err){
+        console.log(err);
+    }
+}
+
+exports.updateLogoutSession = async (body) => {
+    await tripWireModel.findOneAndUpdate({"session": body.session},{"session":"" }).exec();
+    console.log(body)
+}
+exports.updateItem=async(conditions,updations)=>{
+    await tripWireModel.findOneAndUpdate(conditions,updations).exec();
+
 }

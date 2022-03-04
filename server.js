@@ -79,20 +79,28 @@ app.post("/detectTripWire", async (req, res) => {
         console.log(body);
         requestBody = JSON.parse(body);
         items=await mongoOperations.findItem({"session":requestBody.session});
+        if(items.length>0){
         requestBody["paths"].forEach(element => {
            if( items[0].tripwire[element.location]!=undefined && items[0].tripwire[element.location].includes(element.path)){
                 count+=1;
                 
            } 
-           console.log(items[0].tripwire[element.location])
+          // console.log(items[0].tripwire[element.location])
              //need to handle the threshold here     
         });
         console.log(count);
+        let x=threshold.threshold(count);
+        y=threshold.handling(x,requestBody.session);
+    }
 
         // thresholdOps.threshold(count);
 
         
-    })    
+    }) 
+    if(y=="emptysession"){
+        res.send("sessionnull")
+    }   
+    
     res.status(200);
     res.end();
 });
@@ -107,8 +115,8 @@ app.post("/sendfile",async (req,res)=>{
         console.log(body);
         requestBody = JSON.parse(body);
         items=await mongoOperations.findItem({"session":requestBody.session});
-        
-        if (Object.keys(items[0]["tripwire"]).length>1){
+        console.log(items)
+        if (items.lenght>0 &&  Object.keys(items[0]["tripwire"]) && Object.keys(items[0]["tripwire"]).length>1){
             filename = "detection.js"
         }else{
             filename = "path.js"
@@ -122,4 +130,4 @@ app.post("/sendfile",async (req,res)=>{
     // res.end();
 });
 
-app.listen(8000,"127.0.0.5",()=>{console.log(`listenig on port http://127.0.0.5:8000`)});
+app.listen(8000,"127.0.0.5",()=>{console.log(`listening on port http://127.0.0.5:8000`)});
