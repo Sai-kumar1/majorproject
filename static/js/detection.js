@@ -98,11 +98,16 @@ $(document).ready(function () {
         //   let arr=listof
         arr.push({ "path": xPath, "location": window.location.pathname });
         console.log(arr);
-        if (arr.length == "5") {
-            post(arr);
-            arr = [];
-        }
+        // if (arr.length == "5") {
+        //     post(arr);
+        //     arr = [];
+        // }
     });
+    setInterval(function(){
+        post(arr);
+
+    }, 120000);
+
 });
 
 async function post(element) {

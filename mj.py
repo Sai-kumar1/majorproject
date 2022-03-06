@@ -29,20 +29,21 @@ class login:
             self.username=qs_dict["username"][0]
             self.email=qs_dict["email"][0]
         
-        if flow.request.method == "POST" or flow.request.method == "GET":
-
-            cookie = flow.request.headers.get("Cookie")
-            location = re.search("sessionid",str(cookie))
-            id = ""
-            if location:
-                for i in range(location.end()+1 , len(cookie)):
-                    if cookie[i]==";":
-                        break
-                    id+=cookie[i]
+        # if flow.request.method == "POST" or flow.request.method == "GET":
+        cookie = flow.request.headers.get("Cookie")
+        location = re.search("sessionid",str(cookie))
+        id = ""
+        if location:
+            for i in range(location.end()+1 , len(cookie)):
+                if cookie[i]==";":
+                    break
+                id+=cookie[i]
             
-            res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id})
-            data = json.loads(json.loads(res.text))
-            self.filename = data["filename"]
+        res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id,"path":flow.request.path})
+        data = json.loads(json.loads(res.text))
+        print(id,data)
+        self.filename = data["filename"]
+            
 
 
     def response(self,flow:http.HTTPFlow):
@@ -59,13 +60,17 @@ class login:
         # print("\n",id)
         if id!="" and flow.request.path in restricted_list:
             requests.post("http://127.0.0.5:8000/login",json ={"username":self.username,"session":id,"email":self.email})
-            
-        
+
+        # if id!="":  
+        #     res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id,"path":flow})
+        #     data = json.loads(json.loads(res.text))
+        #     print(id,data)
+        #     self.filename = data["filename"]
+
         if flow.request.headers.get('Host')=="foraproject.pythonanywhere.com" and flow.response.headers.get('Content-Type') == 'text/html; charset=utf-8' and flow.request.path not in restricted_list :
-            if self.filename=="":
-                self.filename = "detection.js"
-            replaceString = '<script src = "https://code.jquery.com/jquery-3.4.1.min.js"></script><script src="http://127.0.0.5:8000/{file}"></script></head>'.format(file=self.filename)
-            flow.response.text = flow.response.text.replace('</head>',replaceString)
+            if self.filename!="":
+                replaceString = '<script src = "https://code.jquery.com/jquery-3.4.1.min.js"></script><script src="http://127.0.0.5:8000/{file}"></script></head>'.format(file=self.filename)
+                flow.response.text = flow.response.text.replace('</head>',replaceString)
 
 ###
 # 0. check if user has session already.
@@ -124,11 +129,18 @@ class detectTripwire:
             # print(body)
             # body["path"]=str(flow.request.path)
             requests.post("http://127.0.0.5:8000/detectTripWire",json = body)
+        
+        # if flow.request.method == "POST" and flow.request.path == "/redirect":
+        #     flow.request.headers.host = "foraproject.pythonanywhere.com"
+        #     flow.request.path = "/logout"
     
     def response(self,flow:http.HTTPFlow):
         if flow.response.status_code!=200 and flow.request.path=="/detectTripWire":
             print("Success for detect")
             flow.response.status_code = 200
-            flow.response.text = '{"status":"success"}'        
+            flow.response.text = '{"status":"success"}'
+
+        
+
 
 addons = [login(),createTripwire(),detectTripwire()]
