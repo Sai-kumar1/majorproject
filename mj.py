@@ -23,6 +23,7 @@ class login:
 
     def request(self,flow:http.HTTPFlow):
         get_list=["/login","/signup","/"]
+        resPath = ["/createTripWire","/detectTripWire"]
         if flow.request.method == "POST" and flow.request.path in get_list:
             request_text=flow.request.text
             qs_dict=urllib.parse.parse_qs(request_text)
@@ -38,11 +39,12 @@ class login:
                 if cookie[i]==";":
                     break
                 id+=cookie[i]
-            
-        res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id,"path":flow.request.path})
-        data = json.loads(json.loads(res.text))
-        print(id,data)
-        self.filename = data["filename"]
+        
+        if len(re.findall("\.",flow.request.path))==0 and flow.request.path not in resPath:
+            res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id,"path":flow.request.path})
+            data = json.loads(json.loads(res.text))
+            print("respond data ", id,data)
+            self.filename = data["filename"]
             
 
 

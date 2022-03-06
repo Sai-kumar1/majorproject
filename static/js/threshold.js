@@ -49,10 +49,13 @@ exports.handling=(x,sessionid)=>{
         //  mongoOps.updateItem(conditions,updations);
         returnstring=  "emptysession"
      }
-     item = mongoOps.updateItem(conditions,updations);
+     if (returnstring==""){
+        item = mongoOps.updateItem(conditions,updations);
      console.log(item);
-     redirect("/login");
+    //  redirect("/login");
      mailService.sendMail({"user":item["username"]});
+     }
+     
 
 return returnstring
  }

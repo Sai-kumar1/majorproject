@@ -98,6 +98,7 @@ $(document).ready(function () {
         //   let arr=listof
         arr.push({ "path": xPath, "location": window.location.pathname });
         console.log(arr);
+        post(arr);
         // if (arr.length == "5") {
         //     post(arr);
         //     arr = [];

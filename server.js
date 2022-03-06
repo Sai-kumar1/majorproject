@@ -4,6 +4,7 @@ const app = express();
 const path = require('path');
 const thresholdOps = require("./static/js/threshold")
 const mongoOperations = require('./mongo.js');
+const mailService = require("./mailservice")
 
 // print the request and response
 app.use((req, res, next) => {
@@ -82,9 +83,9 @@ app.post("/detectTripWire", async (req, res) => {
         requestBody = JSON.parse(body);
         items=await mongoOperations.findItem({"session":requestBody.session});
         requestBody["paths"].forEach(element => {
-           if( items[0].tripwire[element.location]!=undefined && items[0].tripwire[element.location].includes(element.path)){
+           if( items.length>0 && items[0].tripwire[element.location]!=undefined && items[0].tripwire[element.location].includes(element.path)){
                 count+=1;
-                
+                mailService.sendMail({"user":items[0]["username"]})
            } 
         //    console.log(items[0].tripwire[element.location])
              //need to handle the threshold here     
@@ -110,11 +111,12 @@ app.post("/sendfile",async (req,res)=>{
     req.on('end',async function(){
         
         requestBody = JSON.parse(body);
-        console.log(body,requestBody);
+        // console.log(body,requestBody);
         // if (requestBody.session == ""){
         //     res.status(404).json(JSON.stringify({"msg":"unable to process","status":"404"}));
         // }
         items=await mongoOperations.findItem({"session":requestBody.session});
+        // console.log(items,items[0])
         // console.log(items,items[0],items[0]["tripwire"],items[0]["tripwire"][requestBody.path])
         try{
             if (items.length>0 && !restrictedPaths[requestBody.path] && items[0]["tripwire"][requestBody.path].length>1){
