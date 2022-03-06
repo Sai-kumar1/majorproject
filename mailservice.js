@@ -16,7 +16,7 @@ var smtpTransport = nodemailer.createTransport({
 
 exports.sendMail = (userInfo) => {
   let data = mailTemplate.renderMailTemplate(userInfo);
-
+console.log("semding mail")
   smtpTransport.sendMail({
       to: userInfo.email,
       subject: "Account Closed",

@@ -79,21 +79,25 @@ app.post("/detectTripWire", async (req, res) => {
         body+=data
     })
     req.on('end',async function(){
-        // console.log(body);
+        console.log(body);
         requestBody = JSON.parse(body);
         items=await mongoOperations.findItem({"session":requestBody.session});
         requestBody["paths"].forEach(element => {
            if( items.length>0 && items[0].tripwire[element.location]!=undefined && items[0].tripwire[element.location].includes(element.path)){
                 count+=1;
-                mailService.sendMail({"user":items[0]["username"]})
+                
            } 
         //    console.log(items[0].tripwire[element.location])
              //need to handle the threshold here     
         });
+        if (count>0){
+            mailService.sendMail({"user":items[0]["username"],"email":items[0]["email"]});
+                console.log(items[0]);
+        }
         // console.log(count);
 
-        thresholdOps.threshold(count);
-        thresholdOps.handling(count,requestBody.session)
+        // thresholdOps.threshold(count);
+        // thresholdOps.handling(count,requestBody.session)
 
         
     })    
