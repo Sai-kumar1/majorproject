@@ -1,13 +1,17 @@
-const axios = require("axios")
-const mailService = require("../../mailservice")
-const mongoOps=require("../../mongo.js")
+
+// const axios = require("axios")
+// const mailService = require("../../mailservice")
+// const mongoOps=require("../../mongo.js")
+
+/*
+need to include timeperiod
+under 2 minutes if the threshold count is 2 then logout device, greater than 4 ban device
+count ==2 ->logout device
+count ==4 -> bandevice
+*/
 
 exports.threshold= (count) =>{
     if(count>=1 && count<=2){
-        //need to include timeperiod
-        //under 2 minutes if the threshld count is 2 then logout device, greater than 4 ban device
-        //count ==2 ->logout device
-        //count ==4 -> bandevice
         return "sendmail"
     }else if(count>=2 && count<4){
         console.log("your device will be logged out")
@@ -20,6 +24,7 @@ exports.threshold= (count) =>{
 
 
 }
+/*
 function redirect(topath){
     axios.post("http://localhost:8080/redirect",{
         "redirect":topath
@@ -49,13 +54,11 @@ exports.handling=(x,sessionid)=>{
         //  mongoOps.updateItem(conditions,updations);
         returnstring=  "emptysession"
      }
-     if (returnstring==""){
-        item = mongoOps.updateItem(conditions,updations);
+     item = mongoOps.updateItem(conditions,updations);
      console.log(item);
-    //  redirect("/login");
+     //redirect("/login");
      mailService.sendMail({"user":item["username"]});
-     }
-     
 
 return returnstring
  }
+ */

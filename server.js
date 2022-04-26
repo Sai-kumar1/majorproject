@@ -76,33 +76,45 @@ app.post("/detectTripWire", async (req, res) => {
     
     let body = "";
     let count= 0;
+
     req.on('data',function(data){
         body+=data
-    })
+    });
+
     req.on('end',async function(){
-        console.log(body);
+        // console.log(body);
         requestBody = JSON.parse(body);
         items=await mongoOperations.findItem({"session":requestBody.session});
-        console.log(items)
+        // console.log(items)
         requestBody["paths"].forEach(element => {
            if( items.length>0 && items[0].tripwire[element.location]!=undefined && items[0].tripwire[element.location].includes(element.path)){
                 count+=1;
                 
-           } 
-        //    console.log(items[0].tripwire[element.location])
-             //need to handle the threshold here     
+           }    
         });
-        if (count>0){
-            mailService.sendMail({"user":items[0]["username"],"email":items[0]["email"]});
-                console.log(items[0]);
-        }
-        // console.log(count);
+        
+        /*
+        * handling the actions on account based on threshold
+        */
+        switch(thresholdOps.threshold(count)){
+            case "sendmail":
+                mailService.sendMail({"user":items[0]["username"],"email":items[0]["email"]},"");
+                break;
+            case "logout":
+                await mongoOperations.updateSession({"username":items[0]["username"],"session":""});
+                mailService.sendMail({"user":items[0]["username"],"email":items[0]["email"]},"");
+                res.redirect("https://foraproject.pythonanywhere.com/login");
+                break;
+            case "banned":
+                await mongoOperations.deleteItem({"username":items[0]["username"]});
+                mailService.sendMail({"user":items[0]["username"],"email":items[0]["email"]},"your account has been in ban please use link sent to your recovery mail.");
+                res.redirect("https://foraproject.pythonanywhere.com/login");
+                break;
 
-        // thresholdOps.threshold(count);
-        // thresholdOps.handling(count,requestBody.session)
+        }
 
         
-    })    
+    });   
     res.status(200);
     res.end();
 });
