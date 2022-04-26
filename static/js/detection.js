@@ -90,17 +90,29 @@
 })(jQuery);
 
 $(document).ready(function () {
+    let arr = []
+    let temparr = []
     $("*").click(function (event) {
         event.stopPropagation();
-        let xPath = $(this).jGetXpath();
-        let arr = []
+        let xPath = "/"+$(this).jGetXpath();
+        
         //   let arr=listof
-        arr.push({ "path": xPath, "location": window.location.pathname })
-        if (arr.length() == "5") {
-            post(arr);
-            arr = [];
-        }
+        arr.push({ "path": xPath, "location": window.location.pathname });
+        temparr.push({ "path": xPath, "location": window.location.pathname });
+        
+        console.log(arr);
+        post(temparr);
+        // if (arr.length == "5") {
+        //     post(arr);
+        //     arr = [];
+        // }
+        temparr=[]
     });
+    setInterval(function(){
+        post(arr);
+
+    }, 120000);
+
 });
 
 async function post(element) {
