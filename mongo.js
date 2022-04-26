@@ -75,7 +75,7 @@ exports.deleteItem=async(conditions)=>{
         // console.log(data);
     }
     catch(err){
-        // console.log(err);
+        console.log(err);
     }
 }
 
