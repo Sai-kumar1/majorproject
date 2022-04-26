@@ -1,4 +1,3 @@
-
 // const axios = require("axios")
 // const mailService = require("../../mailservice")
 // const mongoOps=require("../../mongo.js")
@@ -24,6 +23,7 @@ exports.threshold= (count) =>{
 
 
 }
+
 /*
 function redirect(topath){
     axios.post("http://localhost:8080/redirect",{
