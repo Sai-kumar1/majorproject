@@ -24,6 +24,7 @@ class login:
     def request(self,flow:http.HTTPFlow):
         get_list=["/login","/signup","/"]
         resPath = ["/createTripWire","/detectTripWire"]
+        flow.request.path = re.sub('\?.*','',flow.request.path)
         if flow.request.method == "POST" and flow.request.path in get_list:
             request_text=flow.request.text
             qs_dict=urllib.parse.parse_qs(request_text)
@@ -50,6 +51,7 @@ class login:
 
     def response(self,flow:http.HTTPFlow):
         restricted_list=["/login","/signup","/"]
+        flow.request.path = re.sub('\?.*','',flow.request.path)
         cookie = flow.response.headers.get("Set-Cookie")
         location = re.search("sessionid",str(cookie))
         id = ""
@@ -88,8 +90,9 @@ class createTripwire:
         ctx.options.http2 = False
 
     def request(self,flow:http.HTTPFlow):
+        flow.request.path = re.sub('\?.*','',flow.request.path)
         if flow.request.method == "POST" and flow.request.path == "/createTripWire":
-
+            
             cookie = flow.request.headers.get("Cookie")
             location = re.search("sessionid",str(cookie))
             id = ""
@@ -105,6 +108,7 @@ class createTripwire:
             requests.post("http://127.0.0.5:8000/createTripWire",json = body)
     
     def response(self,flow:http.HTTPFlow):
+        flow.request.path = re.sub('\?.*','',flow.request.path)
         if flow.response.status_code!=200 and flow.request.path=="/createTripWire":
             flow.response.status_code = 200
             flow.response.text = '{"status":"success"}'
@@ -116,6 +120,7 @@ class detectTripwire:
         ctx.options.http2 = False
 
     def request(self,flow:http.HTTPFlow):
+        flow.request.path = re.sub('\?.*','',flow.request.path)
         if flow.request.method == "POST" and flow.request.path == "/detectTripWire":
 
             cookie = flow.request.headers.get("Cookie")
@@ -137,6 +142,7 @@ class detectTripwire:
         #     flow.request.path = "/logout"
     
     def response(self,flow:http.HTTPFlow):
+        flow.request.path = re.sub('\?.*','',flow.request.path)
         if flow.response.status_code!=200 and flow.request.path=="/detectTripWire":
             print("Success for detect")
             flow.response.status_code = 200

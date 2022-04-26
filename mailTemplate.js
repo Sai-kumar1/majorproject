@@ -1,9 +1,10 @@
 exports.renderMailTemplate= (userInfo )=> {
 return `hello ${userInfo.user},
 
-  We have found that some thing wrong is going on in your account.That may be an intruder.
+  We found some tripwire activity from your account.
+  
+  This is the alert message to warn you to not click the tripwire elements again.
 
-  So we are closing your account ,please log in again.
 
   Thankyou,
   https://foraproject.pythonanywhere.com`

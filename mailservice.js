@@ -9,17 +9,20 @@ var smtpTransport = nodemailer.createTransport({
   host: "smtp.gmail.com",
   auth:{
     user:"411808@student.nitandhra.ac.in",
-    pass:"qvlbkmsnbrtsjdgm"
+    pass:"pllwiebvwizghoxi"
   }
 });
 
 
-exports.sendMail = (userInfo) => {
+exports.sendMail = (userInfo,messageData) => {
   let data = mailTemplate.renderMailTemplate(userInfo);
-console.log("semding mail")
+  if (messageData!=""){
+    data = messageData
+  }
+  console.log("sending mail")
   smtpTransport.sendMail({
       to: userInfo.email,
-      subject: "Account Closed",
+      subject: "Alert info",
       text: data,
     }, function(err, reply) {
       console.log(err && err.stack);

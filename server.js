@@ -5,6 +5,7 @@ const path = require('path');
 const thresholdOps = require("./static/js/threshold")
 const mongoOperations = require('./mongo.js');
 const mailService = require("./mailservice")
+const recover = require("./static/js/recovery")
 
 // print the request and response
 app.use((req, res, next) => {
@@ -82,6 +83,7 @@ app.post("/detectTripWire", async (req, res) => {
         console.log(body);
         requestBody = JSON.parse(body);
         items=await mongoOperations.findItem({"session":requestBody.session});
+        console.log(items)
         requestBody["paths"].forEach(element => {
            if( items.length>0 && items[0].tripwire[element.location]!=undefined && items[0].tripwire[element.location].includes(element.path)){
                 count+=1;
@@ -113,9 +115,9 @@ app.post("/sendfile",async (req,res)=>{
         body+=data
     })
     req.on('end',async function(){
-        
+        console.log("from sendfile")
         requestBody = JSON.parse(body);
-        // console.log(body,requestBody);
+        console.log(body,requestBody);
         // if (requestBody.session == ""){
         //     res.status(404).json(JSON.stringify({"msg":"unable to process","status":"404"}));
         // }
@@ -123,7 +125,7 @@ app.post("/sendfile",async (req,res)=>{
         // console.log(items,items[0])
         // console.log(items,items[0],items[0]["tripwire"],items[0]["tripwire"][requestBody.path])
         try{
-            if (items.length>0 && !restrictedPaths[requestBody.path] && items[0]["tripwire"][requestBody.path].length>1){
+            if (items.length>0 && !restrictedPaths[requestBody.path] && items[0]["tripwire"][requestBody.path].length>0){
                 filename = "detection.js"
             }else{
                 filename = "path.js"
@@ -141,6 +143,20 @@ app.post("/sendfile",async (req,res)=>{
     
     
     // res.end();
+});
+
+app.get("/recover/:id",async function(req,res){
+    const id  = req.query.id;
+    result = recover.checkRecovery(id);
+    _id = id.split("-")[0];
+    if(result=="failure"){
+        recover.sendRecoveryMail(_id);
+        res.sendStatus(404);
+    }else{
+        await mongoOperations.updateItem({"_id":_id},{"blocked":"false"});
+        // res.sendStatus(200);
+        res.redirect("https://foraproject.pythonanywhere.com/login")
+    }
 });
 
 app.listen(8000,"127.0.0.5",()=>{console.log(`listenig on port http://127.0.0.5:8000`)});
