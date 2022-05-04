@@ -8,8 +8,8 @@ var smtpTransport = nodemailer.createTransport({
   service : "gmail",
   host: "smtp.gmail.com",
   auth:{
-    user:"411808@student.nitandhra.ac.in",
-    pass:"pllwiebvwizghoxi"
+    user:"your mail address",
+    pass:"your password"
   }
 });
 
