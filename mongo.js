@@ -8,7 +8,7 @@ const tripWireModel = mongoose.model('tripwires', new mongoose.Schema({
     "session": String,
     "email":String,
     "tripwireCreated":String,
-    "banned":String
+    "banned":Boolean
 
 })) ;
 
@@ -54,7 +54,7 @@ exports.updateSession = async (body) => {
 exports.createItem = async (body) => {
     try{
         // console.log(body);
-        let data = await tripWireModel.create({"username": body.username, "tripwire": {"/":[]}, "session": body.session, "email": body.email,"tripwireCreated":"False","bannedAccount":"False"});
+        let data = await tripWireModel.create({"username": body.username, "tripwire": {"/":[]}, "session": body.session, "email": body.email,"tripwireCreated":"False","banned":false});
         // console.log(data);
     }
     catch(err){

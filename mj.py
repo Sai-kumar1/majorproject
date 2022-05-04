@@ -1,10 +1,15 @@
 # import email
 import json
+from sqlite3 import Time
+import time
 import urllib
 from urllib import request
+from urllib import response
 from mitmproxy import ctx,http
 import requests
 import re
+
+from wsproto import Headers
 
 ###
 # 1. check the login attributes in the request to confirm the user credability
@@ -63,8 +68,14 @@ class login:
         # print(cookie)
         # print("\n",id)
         if id!="" and flow.request.path in restricted_list:
-            requests.post("http://127.0.0.5:8000/login",json ={"username":self.username,"session":id,"email":self.email})
-
+            res = requests.post("http://127.0.0.5:8000/login",json ={"username":self.username,"session":id,"email":self.email})
+            data = res.json()
+            print(data)
+            if data["banned"] == True:
+                flow.response.status_code = 404
+            
+            # if data.redirect == True:
+                # flow.request.path = "/"
         # if id!="":  
         #     res = requests.post("http://127.0.0.5:8000/sendfile",json = {"session":id,"path":flow})
         #     data = json.loads(json.loads(res.text))
@@ -81,7 +92,6 @@ class login:
 # 1. check if user has created the tripwires from db.
 # 2. if not, activate the tripwire creation in the js.
 # 3. if user creates the tripwire send them to the db
-
 ###
 class createTripwire:
     
@@ -116,6 +126,8 @@ class createTripwire:
 class detectTripwire:
     
     # if user is not in database, add user to database and create tripwire
+    logout = False
+
     def load(self,loader):
         ctx.options.http2 = False
 
@@ -135,7 +147,10 @@ class detectTripwire:
             body["session"]=id
             # print(body)
             # body["path"]=str(flow.request.path)
-            requests.post("http://127.0.0.5:8000/detectTripWire",json = body)
+            res = requests.post("http://127.0.0.5:8000/detectTripWire",json = body)
+            jsonbody = res.json()
+            if jsonbody["redirect"] == True:
+                self.logout = True
         
         # if flow.request.method == "POST" and flow.request.path == "/redirect":
         #     flow.request.headers.host = "foraproject.pythonanywhere.com"
@@ -146,7 +161,16 @@ class detectTripwire:
         if flow.response.status_code!=200 and flow.request.path=="/detectTripWire":
             print("Success for detect")
             flow.response.status_code = 200
-            flow.response.text = '{"status":"success"}'
+            if self.logout == True:
+                # print(flow.response.text)
+                # flow.response.headers = Headers(host="foraproject.pythonanywhere.com",content_type="application/text")
+                json_string = str(json.dumps({"redirectto":"/logged-out"}))
+                print(json_string)
+                flow.response.text = json_string
+                flow.response.status_code = 200
+            # else:
+                # flow.response.text = '{"status":"success"}'
+        
 
         
 

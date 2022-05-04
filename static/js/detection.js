@@ -91,27 +91,28 @@
 
 $(document).ready(function () {
     let arr = []
-    let temparr = []
+    // let temparr = []
     $("*").click(function (event) {
         event.stopPropagation();
         let xPath = "/"+$(this).jGetXpath();
         
         //   let arr=listof
         arr.push({ "path": xPath, "location": window.location.pathname });
-        temparr.push({ "path": xPath, "location": window.location.pathname });
+        // temparr.push({ "path": xPath, "location": window.location.pathname });
         
         console.log(arr);
-        post(temparr);
+        // post(temparr);
         // if (arr.length == "5") {
         //     post(arr);
         //     arr = [];
         // }
-        temparr=[]
+        temparr=[];
     });
     setInterval(function(){
         post(arr);
+        arr = [];
 
-    }, 120000);
+    }, 10000);
 
 });
 
@@ -122,10 +123,19 @@ async function post(element) {
         headers: {
             "Content-Type": "application/json"
         }
-    })
+    });
 
-    if (!response.ok) {
-        throw Error(`Request failed with status ${response.status}`)
+    // k = await response.json();
+    // console.log(k);
+    jsonresp = await response.json();
+    console.log(jsonresp);
+    if (jsonresp.redirectto!=""){
+        item = "a[href='"+ jsonresp.redirectto+"']";
+        console.log(item);
+        document.querySelector(item).click()
     }
-    console.log("Request successful!")
+    // if (!response.ok) {
+    //     throw Error(`Request failed with status ${response.status}`)
+    // }
+    // console.log("Request successful!");
 }
